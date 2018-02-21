@@ -7,7 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -51,7 +55,8 @@ public class ArticleListActivity extends AppCompatActivity implements
     private SimpleDateFormat outputFormat = new SimpleDateFormat();
     // Most time functions can only handle 1902 - 2037
     private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2,1,1);
-
+    private CoordinatorLayout coordinatorLayout;
+    private boolean thereIsConnection;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,17 +74,47 @@ public class ArticleListActivity extends AppCompatActivity implements
             }
         });
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-
-        getLoaderManager().initLoader(0, null, this);
-
+        coordinatorLayout=findViewById(R.id.coordinator_layout_article_list);
+        if(checkInternetConnection()) {
+            thereIsConnection=true;
+            startLoader();
+        }else{
+            thereIsConnection=false;
+            showSnackBar();
+        }
         if (savedInstanceState == null) {
             refresh();
         }
     }
+    private void startLoader(){
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    private void showSnackBar() {
+        Snackbar snackbar = Snackbar
+                .make(coordinatorLayout, "No internet connection, check it and try again", Snackbar.LENGTH_LONG);
+        snackbar.show();
+    }
+
+    private boolean checkInternetConnection(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
 
 
     private void refresh() {
-        startService(new Intent(this, UpdaterService.class));
+        if(!thereIsConnection&&checkInternetConnection()){startLoader();}
+        else if(thereIsConnection&&checkInternetConnection()){
+        startService(new Intent(this, UpdaterService.class));}
+        else {
+            mIsRefreshing = false;
+            mSwipeRefreshLayout.setRefreshing(mIsRefreshing);
+            showSnackBar();
+        }
+
     }
 
     @Override

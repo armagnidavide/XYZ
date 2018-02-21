@@ -1,4 +1,5 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/coordinator_layout_article_list"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,8 +9,7 @@
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/theme_primary_dark"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+        android:background="@color/theme_primary">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/main.collapsing"
